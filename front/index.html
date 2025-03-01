@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简化版对话助手</title>
+    <link rel="stylesheet" href="src/style.css">
+    <!-- Markdown 解析 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- 代码高亮 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/highlight.min.js"></script>
+    <!-- XSS 防护 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.0/purify.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div id="chat-messages"></div>
+        <div class="input-box">
+            <input type="text" id="user-input" placeholder="请输入问题或指令...">
+            <button id="send-btn">发送</button>
+        </div>
+    </div>
+    <script src="src/main.js"></script>
+</body>
+</html>
