@@ -5,6 +5,7 @@ from LLM import rag_chain  # 导入后端逻辑
 from flask_cors import CORS
 import datetime
 from Config import Config
+from Kit.webKit import jwt_token_required
 # from entity.User import db
 
 app = Flask(__name__, template_folder="front", static_folder="front/src")
@@ -79,15 +80,17 @@ def login():
 
 # 受保护的聊天接口，要求用户登录后访问
 @app.route('/v1/chat/completions', methods=['POST'])
-@jwt_required()
+@jwt_token_required
 def chat():
     # 获取当前用户的身份信息
     current_user = get_jwt_identity()
 
     # 获取请求头中的 Authorization
-    api_key = request.headers.get('Authorization', '').replace('Bearer ', '')
-    if not api_key:
-        return jsonify({'error': 'Missing API Key'}), 401
+    # api_key = request.headers.get('Authorization', '').replace('Bearer ', '')
+    # access_token = request.cookies.get('access_token') or request.headers.get('Authorization', '').replace('Bearer ', '')
+    # if not access_token:
+    #     return jsonify({'error': 'Missing access token'}), 401
+
     
     # 确保请求是 JSON 格式
     if not request.is_json:

@@ -1,0 +1,14 @@
+
+> ai_front@0.1.0 serve /home/kenger/kenger_aibot/ai_front
+> vite dev --host
+
+
+  VITE v6.2.1  ready in 1076 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: http://192.168.216.151:5173/
+  ➜  Network: http://172.19.0.1:5173/
+  ➜  Network: http://172.18.0.1:5173/
+  ➜  Network: http://172.20.0.1:5173/
+  ➜  Network: http://172.23.0.1:5173/
+  ➜  Network: http://172.17.0.1:5173/
