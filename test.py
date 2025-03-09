@@ -1,23 +1,42 @@
-from flask import Flask, render_template, request, jsonify
-from LLM import rag_chain  # 导入后端逻辑
+from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy.orm import sessionmaker, declarative_base
+from werkzeug.security import generate_password_hash, check_password_hash
 
-app = Flask(__name__)
+# 创建基础模型
+Base = declarative_base()
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+# 创建数据库引擎
+engine = create_engine("mysql+pymysql://kenger:WKcqDgd8k5WgF2Xp2koj@127.0.0.1:3306/kenger_blog")
+Session = sessionmaker(bind=engine)
+session = Session()
 
-@app.route('/chat', methods=['POST'])
-def chat():
-    question = request.form.get('question')
-    if not question:
-        return jsonify({'error': 'No question provided'}), 400
-    
-    try:
-        answer = rag_chain.invoke(question)
-        return jsonify({'answer': answer})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+# 用户模型
+class User(Base):
+    __tablename__ = 'users'
 
-if __name__ == '__main__':
-    app.run(debug=True)
+    id = Column(Integer, primary_key=True)
+    username = Column(String(80), unique=True, nullable=False)
+    password = Column(String(120), nullable=False)
+
+    def __repr__(self):
+        return f"<User {self.username}>"
+
+# 创建表
+Base.metadata.create_all(engine)
+
+# 添加用户
+username = "testuser"
+password = "11"
+password_hash = generate_password_hash(password)
+print(f"Password hash: {password_hash}")
+new_user = User(username=username, password=password_hash)
+session.add(new_user)
+session.commit()
+
+# 查询用户并验证密码
+user = session.query(User).filter_by(username=username).first()
+print(f"User found: {user}")
+print("Password verification:", check_password_hash(user.password, password))
+
+# 关闭会话
+session.close()

@@ -1,19 +1,89 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, make_response
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from werkzeug.security import generate_password_hash, check_password_hash
 from LLM import rag_chain  # 导入后端逻辑
 from flask_cors import CORS
-
+import datetime
+from Config import Config
+# from entity.User import db
 
 app = Flask(__name__, template_folder="front", static_folder="front/src")
+# app.config.from_object(Config)
+# Initialize the app with the db instance
+# db.init_app(app)
+
 CORS(app, resources={r"/chat": {"origins": "*"}})  # 允许所有来源访问 /chat 路由
+
+# 配置 Flask-JWT-Extended
+app.config['JWT_SECRET_KEY'] = 'your_jwt_secret_key'  # 更改为强随机密钥，用来加密和解密JWT（JSON Web Token）的密钥。
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(hours=1)  # 设置令牌过期时间
+jwt = JWTManager(app)
+from service.userService import UserService
+# 用户数据库模拟（可以替换成数据库存储）
+users_db = {}
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
+# 注册接口
+@app.route('/register', methods=['POST'])
+def register():
+    data = request.get_json()
 
+    username = data.get('username')
+    password = data.get('password')
+    
+    
 
-@app.route('/chat', methods=['POST'])
+    if not username or not password:
+        return jsonify({'error': 'Username and password are required'}), 400
+    
+    if username in users_db:
+        return jsonify({'error': 'User already exists'}), 400
+
+    # 存储哈希密码
+    # hash_pw = generate_password_hash(password)
+    rsp , info = UserService.register_user(username, password)
+    if not rsp:
+        return jsonify({'error': info}), 400
+    # users_db[username] = generate_password_hash(password)
+
+    return jsonify({'message': 'User registered successfully'}), 201
+
+# 登录接口
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+
+    username = data.get('username')
+    password = data.get('password')
+    # return jsonify({'message': 'Login successful'}), 200
+
+    if not username or not password:
+        return jsonify({'error': 'Username and password are required'}), 400
+    rsp, info  = UserService.authenticate_user(username, password)
+
+    # rsp, info = UserService.authenticate_user(username, password)
+    if not rsp:
+        return jsonify({'error': info}), 401
+
+    # 创建JWT
+    access_token = create_access_token(identity=username)
+    
+    # 设置JWT到Cookie中
+    response = make_response(jsonify({'message': 'Login successful'}))
+    response.set_cookie('access_token', access_token, httponly=True, max_age=app.config['JWT_ACCESS_TOKEN_EXPIRES'])
+    
+    return response
+
+# 受保护的聊天接口，要求用户登录后访问
+@app.route('/v1/chat/completions', methods=['POST'])
+@jwt_required()
 def chat():
+    # 获取当前用户的身份信息
+    current_user = get_jwt_identity()
+
     # 获取请求头中的 Authorization
     api_key = request.headers.get('Authorization', '').replace('Bearer ', '')
     if not api_key:
@@ -29,6 +99,7 @@ def chat():
         
         if not messages:
             return jsonify({'error': 'No messages provided'}), 400
+        print("messages:", messages)
         
         # 获取用户的问题
         user_question = messages[0].get('content')

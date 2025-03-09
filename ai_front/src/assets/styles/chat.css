@@ -1,0 +1,45 @@
+/* 代码块样式 */
+pre {
+    background: #1e1e1e !important;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+    position: relative;
+    font-family: 'Fira Code', monospace;
+    counter-reset: line;
+  }
+  
+  pre code {
+    color: #d4d4d4;
+    display: block;
+    line-height: 1.5;
+    font-size: 0.9em;
+  }
+  
+  /* 语言标签 */
+  pre::after {
+    content: attr(data-language);
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: #3a3a3a;
+    color: #fff;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.8em;
+    border-radius: 0 0 0 4px;
+  }
+  
+  /* 标题限制作用域 */
+  .message-content h1 {
+    font-size: 1.4em;
+    border-bottom: 2px solid #e1e4e8;
+    padding-bottom: 0.3em;
+    margin: 1em 0;
+  }
+  
+  .message-content h2 {
+    font-size: 1.2em;
+    border-bottom: 1px solid #e1e4e8;
+    padding-bottom: 0.2em;
+    margin: 0.8em 0;
+  }

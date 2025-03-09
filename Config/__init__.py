@@ -22,3 +22,18 @@ def get_config(run_env=None):
     else:
         logging.error("Config not exist")
         exit()
+
+
+# config.py
+class Config:
+    
+    SQLALCHEMY_DATABASE_URI = 'mysql://username:password@127.0.0.1/dbname'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SECRET_KEY = 'your-secret-key'  # 用于保护 session
+    SESSION_TYPE = 'filesystem'     # 存储 session 的方式
+
+    def __init__(self, run_env=None):
+        app_config = get_config(run_env)
+        self.SQLALCHEMY_DATABASE_URI = app_config["service"]['SQLALCHEMY_DATABASE_URI']
+        self.SECRET_KEY = app_config["service"]['SECRET_KEY']
+        self.SESSION_TYPE = app_config["service"]['SESSION_TYPE']
