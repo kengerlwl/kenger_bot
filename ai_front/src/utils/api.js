@@ -13,6 +13,7 @@ export const chatAPI = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer sk-G0483zq1XMOa0XAriQSMb5uDo6npYFNnWUPt7zgk3ouemcaI'
       },
+
       body: JSON.stringify({
         model: payload.model,
         messages: payload.messages.map(msg => ({
@@ -97,8 +98,8 @@ export const chatAPI = {
     const response = await fetch('/kenger/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer YOUR_OPENAI_API_KEY'
+        'Content-Type': 'application/json'
+        // 'Authorization': 'Bearer YOUR_OPENAI_API_KEY'
       },
       body: JSON.stringify({
         model: payload.model,

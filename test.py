@@ -1,42 +1,34 @@
-from sqlalchemy import create_engine, Column, Integer, String
-from sqlalchemy.orm import sessionmaker, declarative_base
-from werkzeug.security import generate_password_hash, check_password_hash
+from LLM.openaiUtils import *
+from Config import *
 
-# 创建基础模型
-Base = declarative_base()
+conf = get_config()
+openai_conf = conf['openai3']
+client = OpenAIUtils(base_url=openai_conf['base_url'], model_id=openai_conf['model_id'], generation_kwargs=openai_conf['generation_kwargs'], _api_key=openai_conf['api_key'])
 
-# 创建数据库引擎
-engine = create_engine("mysql+pymysql://kenger:WKcqDgd8k5WgF2Xp2koj@127.0.0.1:3306/kenger_blog")
-Session = sessionmaker(bind=engine)
-session = Session()
+# prompt = "What is the capital of China?"
+ai_prompt = """
+代码提交摘要（Commit Message: CM）是软件开发中用于描述代码变更的简要说明，对代码理解、协作和维护至关重要。尽管目前自动生成CM的方法已经有了进展，但仍存在许多挑战：首先现有的生成模型往往没有充分历史开发者的历史风格，导致生成CM不规范。其次是模型往往只能处理有限长度的输入，面对实际开发中的长代码提交往往束手无策。针对这些挑战，本文提出基于风格增强的CMG和基于大模型的多轮迭代评审推理的CMG，以提高生成CM的准确性和可读性。
+"""
 
-# 用户模型
-class User(Base):
-    __tablename__ = 'users'
+human_prompt = """
+模型框架如图所示，首先通过向量嵌入模型输入Diff，检索出语义相似度高的Similar Message，然后通过BM25检索出关键词匹配高的Similar Message。最后，通过重排模型筛选出其中更有价值的Similar Message。接着，在风格增强生成模块中，将检索信息与代码diff分别输入Message Encoder和Diff  Encoder。然后经由协同注意力机制将这两个Message和Diff信息进行深度融合。息。最后，基于融合后的语义信息，模型在训练阶段引入基于Gram的风格损失函数，使得生成的Commit Message既准确又符合开发者个性化风格，全面提升生成质量和风格一致性。
+"""
+# import tiktoken
 
-    id = Column(Integer, primary_key=True)
-    username = Column(String(80), unique=True, nullable=False)
-    password = Column(String(120), nullable=False)
+# # Try to list available encodings
+# # print(tiktoken.registry.__dict__)
 
-    def __repr__(self):
-        return f"<User {self.username}>"
+num, tokens = client.get_tokens(ai_prompt, "gpt-4o-mini")
+print(num, tokens)
 
-# 创建表
-Base.metadata.create_all(engine)
+# # ai检测
+# print("AI检测")
+# pro, msg = client.cal_ai_prob(ai_prompt)
+# print(f"Probability of prompt '{ai_prompt[:10]}...': {pro}")
+# print(f"Response: {msg}")
 
-# 添加用户
-username = "testuser"
-password = "11"
-password_hash = generate_password_hash(password)
-print(f"Password hash: {password_hash}")
-new_user = User(username=username, password=password_hash)
-session.add(new_user)
-session.commit()
-
-# 查询用户并验证密码
-user = session.query(User).filter_by(username=username).first()
-print(f"User found: {user}")
-print("Password verification:", check_password_hash(user.password, password))
-
-# 关闭会话
-session.close()
+# # human检测
+# print("Human检测")
+# pro, msg = client.cal_ai_prob(human_prompt)
+# print(f"Probability of prompt '{human_prompt[:10]}...': {pro}")
+# print(f"Response: {msg}")

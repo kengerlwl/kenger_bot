@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Login from '@/components/User/login.vue'
 import Register from '@/components/User/Register.vue'
 import ChatContainer from '@/components/Chat/ChatContainer.vue'
+import AiDetect from '@/components/Chat/AiDetect.vue'
 
 // 定义路由
 const routes = [
@@ -17,6 +18,10 @@ const routes = [
   {
     path: '/register',
     component: Register
+  },
+  {
+    path: '/aidetect',
+    component: AiDetect,
   }
 ]
 

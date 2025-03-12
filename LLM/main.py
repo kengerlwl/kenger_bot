@@ -80,7 +80,7 @@ openai_llm = ChatOpenAI(
     model=openai_conf['model_id'],  # 根据实际模型名称修改
     base_url=openai_conf['base_url'],  # 本地服务地址
     api_key= openai_conf['api_key'] ,  # 虚拟key（某些本地服务可任意填写）
-    temperature=openai_conf['temperature'],  # 温度参数
+    temperature=openai_conf['generation_kwargs']['temperature'],  # 温度参数
     
 )
 

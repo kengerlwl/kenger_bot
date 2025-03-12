@@ -14,6 +14,9 @@
           checked-children="流式" 
           un-checked-children="非流式"
         />
+      <a-button type="primary" @click="goToAiDetect" style="margin-left: 10px">
+        AI 检测
+      </a-button>
       </div>
       <div class="model-tips">
         当前模型：{{ selectedModelLabel }} | 模式：{{ streamMode ? '流式' : '非流式' }}
@@ -68,6 +71,8 @@ import { useChat } from '@/hooks/useChat'
 import { marked } from 'marked';
 import { renderMarkdown } from '@/utils/markdown'; // 修改引入路径
 import 'highlight.js/styles/github-dark.css'; // 直接引入样式
+import { useRouter } from 'vue-router';
+const router = useRouter();
 
 const {
   messages,
@@ -83,7 +88,9 @@ const {
 } = useChat()
 
 const messagesEnd = ref(null)
-
+const goToAiDetect = () => {
+  router.push('/aidetect');
+};
 // 自动滚动到底部
 const scrollToBottom = () => {
   nextTick(() => {

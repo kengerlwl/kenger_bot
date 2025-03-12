@@ -6,18 +6,26 @@ from flask_cors import CORS
 import datetime
 from Config import Config
 from Kit.webKit import jwt_token_required
+from Kit import *
+from ai_detect import openai_client
 # from entity.User import db
 
-app = Flask(__name__, template_folder="front", static_folder="front/src")
+app = Flask(__name__, template_folder="/home/kenger/kenger_aibot/ai_front/dist", static_folder="/home/kenger/kenger_aibot/ai_front/dist/assets")
 # app.config.from_object(Config)
 # Initialize the app with the db instance
 # db.init_app(app)
 
 CORS(app, resources={r"/chat": {"origins": "*"}})  # 允许所有来源访问 /chat 路由
 
+
+
+
 # 配置 Flask-JWT-Extended
 app.config['JWT_SECRET_KEY'] = 'your_jwt_secret_key'  # 更改为强随机密钥，用来加密和解密JWT（JSON Web Token）的密钥。
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(hours=1)  # 设置令牌过期时间
+app.config['JWT_TOKEN_LOCATION'] = ['headers', 'cookies']  # 允许从请求头和 Cookie 获取 Token
+app.config['JWT_ACCESS_COOKIE_NAME'] = 'access_token'  # 指定 Cookie 名称
+app.config['JWT_COOKIE_CSRF_PROTECT'] = False  # 如果不需要 CSRF 保护，可以关闭
 jwt = JWTManager(app)
 from service.userService import UserService
 # 用户数据库模拟（可以替换成数据库存储）
@@ -28,7 +36,7 @@ def index():
     return render_template('index.html')
 
 # 注册接口
-@app.route('/register', methods=['POST'])
+@app.route('/kenger/register', methods=['POST'])
 def register():
     data = request.get_json()
 
@@ -53,7 +61,7 @@ def register():
     return jsonify({'message': 'User registered successfully'}), 201
 
 # 登录接口
-@app.route('/login', methods=['POST'])
+@app.route('/kenger/login', methods=['POST'])
 def login():
     data = request.get_json()
 
@@ -85,11 +93,6 @@ def chat():
     # 获取当前用户的身份信息
     current_user = get_jwt_identity()
 
-    # 获取请求头中的 Authorization
-    # api_key = request.headers.get('Authorization', '').replace('Bearer ', '')
-    # access_token = request.cookies.get('access_token') or request.headers.get('Authorization', '').replace('Bearer ', '')
-    # if not access_token:
-    #     return jsonify({'error': 'Missing access token'}), 401
 
     
     # 确保请求是 JSON 格式
@@ -133,6 +136,34 @@ def chat():
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+from concurrent.futures import ThreadPoolExecutor
+executor = ThreadPoolExecutor(max_workers=10)  # 设置最大线程数
+
+
+@app.route('/kenger/ai_prob', methods=['POST'])
+def ai_prob():
+    data = request.get_json()
+    texts = data.get('text', '')
+    print("texts:", texts)
+    logger.info(f"AI检测文本：{texts}")
+    
+    rsp = openai_client.cal_ai_prob(texts=texts)
+    return jsonify(rsp)
+
+    # if not texts:
+    #     return jsonify({'error': 'Text input is required'}), 400
+
+    # texts = texts.split('\n')
+
+    # def process_text(text):
+    #     return openai_client.cal_ai_prob(text)
+
+    # # 每次请求新建一个 ThreadPoolExecutor，避免被 Flask 回收
+    # with ThreadPoolExecutor(max_workers=10) as executor:
+    #     results = list(executor.map(process_text, filter(None, texts)))
+
+    # logger.info(f"AI检测结果：{results}")
+    # return jsonify(results)
 
 @app.after_request
 def after_request(response):
